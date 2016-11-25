@@ -5,8 +5,9 @@ This vagrant environment will build a Puppet master server and a number of virtu
 * Vagrant (tested on 1.8.7, but watch out for this issue if you're on MacOS Sierra https://github.com/mitchellh/vagrant/issues/5016#issuecomment-260065012)
 * VirtualBox (tested with 5.0.16)
 * NX-OSv box file: 
-    * follow the instructions [here](http://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus9000/sw/7-x/nx-osv/configuration/guide/b_NX-OSv_9000/b_NX-OSv_chapter_01.html#reference_BAD5B5587C6B45AAB2FA462759DCCBD0) (the sections titled "Creating a VM in a VirtualBox Environment" through "Set Up SSH Passwordless Connection to VM").
-    * export to a .box file: `vagrant package --base n9kv --output n9kv.box`
+    * Download the .VMDK file from [CCO](https://software.cisco.com/download/release.html?mdfid=286312239&flowid=81422&softwareid=282088129&release=7.0(3)I5(1)&relind=AVAILABLE&rellifecycle=&reltype=latest)
+    * Follow the instructions [here](http://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus9000/sw/7-x/nx-osv/configuration/guide/b_NX-OSv_9000/b_NX-OSv_chapter_01.html#reference_BAD5B5587C6B45AAB2FA462759DCCBD0) (the sections titled "Creating a VM in a VirtualBox Environment" through "Set Up SSH Passwordless Connection to VM").
+    * Export to a .box file: `vagrant package --base n9kv --output n9kv.box`
 
 
 ## Usage
