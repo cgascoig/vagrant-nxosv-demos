@@ -13,19 +13,19 @@ node /^n9kv\d/ {
 	syslog_server {'10.67.28.129':
 		ensure  => present,
 	}
-  #
-  # # Access port configuration
-  # cisco_vlan {'100':
-  #   vlan     => 100,
-  #   vlan_name  => "web",
-  #   state    => 'active',
-  # }
-  # cisco_interface {"Ethernet1/2":
-  #      ensure      => present,
-  #   description => "server-web",
-  #   access_vlan  =>  100,
-  # }
-  #
+
+  # Access port configuration
+  cisco_vlan {'100':
+    vlan     => 100,
+    vlan_name  => "web",
+    state    => 'active',
+  }
+  cisco_interface {"Ethernet1/2":
+    ensure      => present,
+    description => "server-web",
+    access_vlan  =>  100,
+  }
+
   # # OSPF Configuration
   # cisco_ospf {'underlay':
   #   ensure  => present,
