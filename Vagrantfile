@@ -32,7 +32,7 @@ Vagrant.configure(2) do |config|
       sudo sh -c 'echo "dns_alt_names = localhost, master" >> /etc/puppetlabs/puppet/puppet.conf'
       sudo sh -c 'echo "autosign = true" >> /etc/puppetlabs/puppet/puppet.conf'
       sudo service puppetserver start
-      sudo /opt/puppetlabs/bin/puppet module install puppetlabs-ciscopuppet
+      #sudo /opt/puppetlabs/bin/puppet module install puppetlabs-ciscopuppet
     SHELL
 
   end
