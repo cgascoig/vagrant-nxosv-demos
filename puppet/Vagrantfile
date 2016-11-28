@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-nxos_box_name = "nxosv/evergreen"
+nxos_box_name = "nxosv/7-0-3-i5-1"
 
 Vagrant.configure(2) do |config|
   config.vm.define "master" do |master|
@@ -39,7 +39,7 @@ Vagrant.configure(2) do |config|
 
 
   config.vm.define "n9kv1" do |n9kv1|
-        n9kv1.vm.box = "nxosv/evergreen"
+        n9kv1.vm.box = nxos_box_name
 
         if Vagrant.has_plugin?("vagrant-cachier")
           config.cache.disable!
@@ -93,7 +93,7 @@ Vagrant.configure(2) do |config|
   end
  
   config.vm.define "n9kv2" do |n9kv2|
-        n9kv2.vm.box = "n9kv"
+        n9kv2.vm.box = nxos_box_name
 
         if Vagrant.has_plugin?("vagrant-cachier")
           config.cache.disable!
@@ -120,27 +120,29 @@ Vagrant.configure(2) do |config|
                 vb.customize ['modifyvm',:id,'--nicpromisc8','allow-all']
         end
         n9kv2.vm.provision "shell", privileged: true, inline: <<-SHELL
-          sleep 30 #otherwise the interfaces might not be ready for configuration 
+          sleep 30 #otherwise the interfaces might not be ready for configuration
 
           # Configure Eth1/1 with unique MAC and IP
-          echo -e 'hostname n9kv2\ndefault interface Ethernet1/1\ninterface Ethernet1/1\n no shutdown\n no switchport\n\n mac-address 1.1.2'> /tmp/mac-cfg
-          vsh -r /tmp/mac-cfg
-          ip add add 192.168.1.2/24 dev Eth1-1
+
+          echo -e 'hostname n9kv1\nvrf context management\n ip route 0.0.0.0/0 10.0.2.3\ndefault interface Ethernet1/1\ninterface Ethernet1/1\n no shutdown\n no switchport\n\n mac-address 1.1.2'> /tmp/mac-cfg
+          sudo vsh -r /tmp/mac-cfg
+          sudo ip add add 192.168.1.2/24 dev Eth1-1
 
           echo "192.168.1.254    master">>/etc/hosts
-          echo "nameserver 10.0.2.3" > /etc/resolv.conf
-          vsh -c 'copy running-config startup-config'
+          sudo bash -c  'echo "nameserver 10.0.2.3" > /etc/resolv.conf'
+          sudo vsh -c 'copy running-config startup-config'
 
-          ip netns exec management rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs
-          ip netns exec management rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-reductive
-          ip netns exec management yum -y install http://yum.puppetlabs.com/puppetlabs-release-pc1-cisco-wrlinux-5.noarch.rpm
-          ip netns exec management yum -y install puppet
+          sudo ip netns exec management rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs
+          sudo ip netns exec management rpm --import http://yum.puppetlabs.com/RPM-GPG-KEY-reductive
+          sudo ip netns exec management yum -y install http://yum.puppetlabs.com/puppetlabs-release-pc1-cisco-wrlinux-5.noarch.rpm
+          sudo ip netns exec management yum -y install puppet
 
-          echo -e '[main]\nserver = master\n[agent]\npluginsync  = true\nignorecache = true' > /etc/puppetlabs/puppet/puppet.conf
+          sudo bash -c "echo -e '[main]\nserver = master\n[agent]\npluginsync  = true\nignorecache = true' > /etc/puppetlabs/puppet/puppet.conf"
 
-          ip netns exec management /opt/puppetlabs/puppet/bin/gem install --no-rdoc --no-ri cisco_node_utils
+          sudo ip netns exec management /opt/puppetlabs/puppet/bin/gem install --no-rdoc --no-ri cisco_node_utils
 
           echo -e '\n\n----------------\n\nProvisioning complete, next connect to the NX-OSv instance ("vagrant ssh n9kv2") and run the puppet agent ("sudo /opt/puppetlabs/bin/puppet agent -t")\n'
+
         SHELL
   end
 end

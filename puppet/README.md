@@ -1,17 +1,14 @@
 # Puppet with NX-OSv Demo
-This vagrant environment will build a Puppet master server and a number of virtual Nexus 9000 switches, each with the Puppet agent installed and configured to use the master. 
+This vagrant environment will build a Puppet master server and two virtual Nexus 9000 switches, each with the Puppet agent installed and configured to use the master. 
 
 ## Requirements
-* Vagrant (tested on 1.8.7, but watch out for this issue if you're on MacOS Sierra https://github.com/mitchellh/vagrant/issues/5016#issuecomment-260065012)
-* VirtualBox (tested with 5.0.16)
-* NX-OSv box file: 
-    * Download the .VMDK file from [CCO](https://software.cisco.com/download/release.html?mdfid=286312239&flowid=81422&softwareid=282088129&release=7.0(3)I5(1)&relind=AVAILABLE&rellifecycle=&reltype=latest)
-    * Follow the instructions [here](http://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus9000/sw/7-x/nx-osv/configuration/guide/b_NX-OSv_9000/b_NX-OSv_chapter_01.html#reference_BAD5B5587C6B45AAB2FA462759DCCBD0) (the sections titled "Creating a VM in a VirtualBox Environment" through "Set Up SSH Passwordless Connection to VM").
-    * Export to a .box file: `vagrant package --base n9kv --output n9kv.box`
-
+See the README.md in the repository root for common requirements. 
 
 ## Usage
-* Import the .box file into the vagrant registry: `vagrant box add --name nxosv/evergreen n9kv.box`
-* Start the master and a single n9kv: `vagrant up master n9kv1`
-* SSH onto the NX-OSv: `vagrant ssh n9kv1`
+* Start the master and a single n9kv (recommended if you have 16GB or less RAM): `vagrant up master n9kv1`
+    * Just run `vagrant up` if you have sufficient RAM and want to start all 3 VMs
+* SSH onto the first NX-OSv: `vagrant ssh n9kv1`
 * Start a puppet run based on the default manifest: `sudo /opt/puppetlabs/bin/puppet agent -t`
+* Check the running configuration: `vsh -c 'show run'` (you can also just run `vsh` to drop into an NX-OS shell)
+* Review and modify the sample Puppet manifest in `environment_production/manifests/site.pp` then re-run `sudo /opt/puppetlabs/bin/puppet agent -t` on the NX-OSv to see that the configuration is updated. 
+* When you have finished, run `vagrant destroy` to terminate and remove all of the created VMs
