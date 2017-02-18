@@ -3,9 +3,18 @@
 
 nxos_box_name = "nxosv/7-0-3-i5-1"
 
+installers = Dir.entries(File.dirname(__FILE__)).select { |f| f =~ /puppet-enterprise.*.tar.gz/ }
+if installers.empty?
+  fail("No installer found, please place a Puppet Enterprise tgz file in the same directory as Vagrantfile")
+end
+
+# If there is more than one installer in the directory we
+# use the latest one
+installer = installers.last
+
 Vagrant.configure(2) do |config|
   config.vm.define "master" do |master|
-    master.vm.box = "ubuntu/vivid64"
+    master.vm.box = "ubuntu/xenial64"
     if Vagrant.has_plugin?("vagrant-cachier")
       # Configure cached packages to be shared between instances of the same base box.
       # More info on http://fgrehm.viewdocs.io/vagrant-cachier/usage
@@ -19,21 +28,30 @@ Vagrant.configure(2) do |config|
       #   vb.gui = true
       #
       #   # Customize the amount of memory on the VM:
-        vb.memory = "3072"
+        vb.memory = "4096"
     end
 
     master.vm.network "private_network", ip: "192.168.1.254", virtualbox__intnet: "nxosv_network1"
+    
+    master.vm.provision "shell", inline: %Q{
+          mkdir /root/pe
+          tar -xv -C /root/pe --strip 1 -f /vagrant/#{installer}
+          cd /root/pe
+          ./puppet-enterprise-installer -y -c /vagrant/pe.conf
+          echo '*' > /etc/puppetlabs/puppet/autosign.conf
+          (/opt/puppetlabs/bin/puppet agent -t ; true)
+        }
 
-    master.vm.provision "shell", privileged: false, inline: <<-SHELL
-      sudo wget https://apt.puppetlabs.com/puppetlabs-release-pc1-vivid.deb
-      sudo dpkg -i puppetlabs-release-pc1-vivid.deb
-      sudo apt-get update
-      sudo apt-get -y install puppetserver
-      sudo sh -c 'echo "dns_alt_names = localhost, master" >> /etc/puppetlabs/puppet/puppet.conf'
-      sudo sh -c 'echo "autosign = true" >> /etc/puppetlabs/puppet/puppet.conf'
-      sudo service puppetserver start
-      #sudo /opt/puppetlabs/bin/puppet module install puppetlabs-ciscopuppet
-    SHELL
+    # master.vm.provision "shell", privileged: false, inline: <<-SHELL
+    #   sudo wget https://apt.puppetlabs.com/puppetlabs-release-pc1-vivid.deb
+    #   sudo dpkg -i puppetlabs-release-pc1-vivid.deb
+    #   sudo apt-get update
+    #   sudo apt-get -y install puppetserver
+    #   sudo sh -c 'echo "dns_alt_names = localhost, master" >> /etc/puppetlabs/puppet/puppet.conf'
+    #   sudo sh -c 'echo "autosign = true" >> /etc/puppetlabs/puppet/puppet.conf'
+    #   sudo service puppetserver start
+    #   #sudo /opt/puppetlabs/bin/puppet module install puppetlabs-ciscopuppet
+    # SHELL
 
   end
 
