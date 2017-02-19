@@ -90,7 +90,7 @@ Vagrant.configure(2) do |config|
           sudo bash -c  'echo "nameserver 10.0.2.3" > /etc/resolv.conf'
           sudo vsh -c 'copy running-config startup-config'
 
-          echo -e '\n\n----------------\n\nProvisioning complete, next connect to the NX-OSv instance ("vagrant ssh n9kv1") and run the puppet agent ("sudo /opt/puppetlabs/bin/puppet agent -t")\n'
+          echo -e '\n\n----------------\n\nProvisioning complete, next connect to the master instance ("vagrant ssh master") and run the Ansible playbook ("ansible-playbook -i ansible/hosts ansible/site.yml")\n'
 
         SHELL
   end
@@ -135,7 +135,7 @@ Vagrant.configure(2) do |config|
           sudo bash -c  'echo "nameserver 10.0.2.3" > /etc/resolv.conf'
           sudo vsh -c 'copy running-config startup-config'
 
-          echo -e '\n\n----------------\n\nProvisioning complete, next connect to the NX-OSv instance ("vagrant ssh n9kv2") and run the puppet agent ("sudo /opt/puppetlabs/bin/puppet agent -t")\n'
+          echo -e '\n\n----------------\n\nProvisioning complete, next connect to the master instance ("vagrant ssh master") and run the Ansible playbook ("ansible-playbook -i ansible/hosts ansible/site.yml")\n'
 
         SHELL
   end
