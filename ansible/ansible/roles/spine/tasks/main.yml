@@ -1,0 +1,33 @@
+---
+
+
+- name: set MAC on downlink to L3
+  nxos_config:
+    lines: 
+      - mac-address 0001.0001.0002
+    match: line
+    parents: "interface {{ l1_interface }}"
+    provider: "{{ provider }}"
+    
+- name: set leaf1 downlink to L3
+  nxos_interface:
+    interface: "{{ l1_interface }}"
+    description: Downlink to leaf1
+    mode: layer3
+    provider: "{{ provider }}"
+    
+- name: set leaf1 downlink IP address
+  nxos_ip_interface:
+    interface: "{{ l1_interface }}"
+    version: v4
+    state: present
+    addr: "{{ l1_interface_addr }}"
+    mask: 30
+    provider: "{{ provider }}"
+    
+- name: configure OSPF on downlink
+  nxos_interface_ospf:
+    interface: "{{ l1_interface }}"
+    ospf: underlay-1
+    area: 0
+    provider: "{{ provider }}"

@@ -1,0 +1,32 @@
+---
+
+    
+- hosts: all
+  vars: 
+    provider:
+      host: "{{ inventory_hostname }}"
+      transport: "{{ transport }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+  roles:
+    - common
+    
+- hosts: leafswitches
+  vars: 
+    provider:
+      host: "{{ inventory_hostname }}"
+      transport: "{{ transport }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+  roles:
+    - leaf
+    
+- hosts: spineswitches
+  vars: 
+    provider:
+      host: "{{ inventory_hostname }}"
+      transport: "{{ transport }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+  roles:
+    - spine

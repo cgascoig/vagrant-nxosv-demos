@@ -1,0 +1,29 @@
+---
+# - name: set NTP server
+#   nxos_ntp:
+#     server: ntp.esl.cisco.com
+#     host: "{{ inventory_hostname }}"
+#     transport: nxapi
+- name: enable OSPF feature
+  nxos_feature:
+    feature: ospf
+    state: enabled
+    provider: "{{ provider }}"
+    
+- name: enable BGP feature
+  nxos_feature:
+    feature: bgp
+    state: enabled
+    provider: "{{ provider }}"
+    
+- name: enable NV feature
+  nxos_feature:
+    feature: nve
+    state: enabled
+    provider: "{{ provider }}"
+
+- name: create OSPF instance
+  nxos_ospf:
+    ospf: underlay-1
+    state: present
+    provider: "{{ provider }}"

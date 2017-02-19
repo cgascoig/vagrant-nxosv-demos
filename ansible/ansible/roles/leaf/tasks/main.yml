@@ -1,0 +1,23 @@
+---
+- name: set uplink to L3
+  nxos_interface:
+    interface: "{{ uplink_interface }}"
+    description: Uplink to spine
+    mode: layer3
+    provider: "{{ provider }}"
+    
+- name: set uplink IP address
+  nxos_ip_interface:
+    interface: "{{ uplink_interface }}"
+    version: v4
+    state: present
+    addr: "{{ uplink_addr }}"
+    mask: 30
+    provider: "{{ provider }}"
+
+- name: configure OSPF on uplink
+  nxos_interface_ospf:
+    interface: "{{ uplink_interface }}"
+    ospf: underlay-1
+    area: 0
+    provider: "{{ provider }}"

@@ -1,0 +1,20 @@
+[leafswitches]
+192.168.1.1     uplink_addr=2.2.2.2
+
+[leafswitches:vars]
+ansible_connection = local
+uplink_interface = Ethernet1/7
+username = admin
+password = admin
+transport = nxapi
+
+[spineswitches]
+192.168.1.2
+
+[spineswitches:vars]
+ansible_connection = local
+l1_interface = Ethernet1/7
+l1_interface_addr = 2.2.2.1
+username = admin
+password = admin
+transport = nxapi
