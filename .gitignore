@@ -1,3 +1,4 @@
 .vagrant
 puppet/puppet-enterprise-*.tar.gz
 ansible/ansible/*.retry
+*.log
