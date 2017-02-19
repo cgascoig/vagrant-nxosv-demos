@@ -1,13 +1,4 @@
 ---
-
-
-- name: set MAC on downlink to L3
-  nxos_config:
-    lines: 
-      - mac-address 0001.0001.0002
-    match: line
-    parents: "interface {{ l1_interface }}"
-    provider: "{{ provider }}"
     
 - name: set leaf1 downlink to L3
   nxos_interface:
@@ -30,4 +21,12 @@
     interface: "{{ l1_interface }}"
     ospf: underlay-1
     area: 0
+    provider: "{{ provider }}"
+    
+- name: set MAC on downlink to L3
+  nxos_config:
+    lines: 
+      - mac-address 0001.0001.0002
+    match: line
+    parents: "interface {{ l1_interface }}"
     provider: "{{ provider }}"
