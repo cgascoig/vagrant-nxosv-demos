@@ -11,6 +11,16 @@
   roles:
     - common
     
+- hosts: spineswitches
+  vars: 
+    provider:
+      host: "{{ inventory_hostname }}"
+      transport: "{{ transport }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+  roles:
+    - spine
+    
 - hosts: leafswitches
   vars: 
     provider:
@@ -21,12 +31,3 @@
   roles:
     - leaf
     
-- hosts: spineswitches
-  vars: 
-    provider:
-      host: "{{ inventory_hostname }}"
-      transport: "{{ transport }}"
-      username: "{{ username }}"
-      password: "{{ password }}"
-  roles:
-    - spine

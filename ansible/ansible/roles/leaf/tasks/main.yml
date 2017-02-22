@@ -1,4 +1,23 @@
+#Leaf Role
 ---
+- name: enable vn-segment-vlan-based feature
+  nxos_feature:
+    feature: vn-segment-vlan-based
+    state: enabled
+    provider: "{{ provider }}"
+    
+- name: enable interface-vlan feature
+  nxos_feature:
+    feature: interface-vlan
+    state: enabled
+    provider: "{{ provider }}"
+
+- name: enable pim feature
+  nxos_feature:
+    feature: pim
+    state: enabled
+    provider: "{{ provider }}"
+
 - name: set uplink to L3
   nxos_interface:
     interface: "{{ uplink_interface }}"
@@ -11,8 +30,8 @@
     interface: "{{ uplink_interface }}"
     version: v4
     state: present
-    addr: "{{ uplink_addr }}"
-    mask: 30
+    addr: "{{ fabric_link_subnet }}{{ uplink_addr }}"
+    mask: "{{ fabric_link_mask }}"
     provider: "{{ provider }}"
 
 - name: configure OSPF on uplink
@@ -20,4 +39,151 @@
     interface: "{{ uplink_interface }}"
     ospf: underlay-1
     area: 0
+    provider: "{{ provider }}"
+    
+- name: configure spine BGP neighbours
+  nxos_bgp_neighbor:
+    asn: "{{ asn }}"
+    neighbor: "{{ loopback_subnet }}{{ hostvars[item]['loopback_addr'] }}"
+    remote_as: "{{ asn }}"
+    description: "spine {{ item }}"
+    update_source: loopback0
+    state: present
+    provider: "{{ provider }}"
+  with_items: "{{ groups['spineswitches'] }}"
+  
+- name: configure spine BGP neighbours AF
+  nxos_bgp_neighbor_af:
+    asn: "{{ asn }}"
+    neighbor: "{{ loopback_subnet }}{{ hostvars[item]['loopback_addr'] }}"
+    afi: l2vpn
+    safi: evpn
+    send_community: both
+    state: present
+    provider: "{{ provider }}"
+  with_items: "{{ groups['spineswitches'] }}"
+  
+  
+  
+  
+##############
+## hard coded examples
+## TODO: Parametrise better
+
+
+- name: configure anycast gateway MAC
+  nxos_overlay_global:
+    anycast_gateway_mac: "0001.0001.0001"
+    provider: "{{ provider }}"
+    
+- name: configure VLAN 10
+  nxos_vlan:
+    vlan_id: 10
+    mapped_vni: 10010
+    state: present
+    admin_state: up
+    provider: "{{ provider }}"
+    
+- name: configure VRF red
+  nxos_vrf:
+    vrf: red
+    vni: 10000
+    rd: auto
+    provider: "{{ provider }}"
+    
+- name: configure VRF red IPv4 AF
+  nxos_vrf_af:
+    vrf: red
+    afi: ipv4
+    safi: unicast
+    route_target_both_auto_evpn: true
+    provider: "{{ provider }}"
+
+- name: configure VLAN 10
+  nxos_interface:
+    interface: Vlan10
+    admin_state: up
+    state: present
+    mode: layer3
+    fabric_forwarding_anycast_gateway: true
+    provider: "{{ provider }}"
+    
+- name: configure VLAN 10 in VRF red
+  nxos_vrf_interface:
+    interface: Vlan10
+    vrf: red
+    provider: "{{ provider }}"
+    
+- name: configure VLAN 10 IP
+  nxos_ip_interface:
+    interface: Vlan10
+    addr: 1.1.1.1
+    mask: 24
+    provider: "{{ provider }}"
+
+- name: configure NVE1
+  nxos_vxlan_vtep:
+    interface: nve1
+    source_interface: loopback0
+    host_reachability: true
+    state: present
+    provider: "{{ provider }}"
+    
+- name: configure NVE1 L3 VNI (VRF red)
+  nxos_vxlan_vtep_vni:
+    interface: nve1
+    vni: 10000
+    assoc_vrf: true
+    state: present
+    provider: "{{ provider }}"
+    
+- name: configure NVE1 L2 VNI (VLAN 10)
+  nxos_vxlan_vtep_vni:
+    interface: nve1
+    vni: 10010
+    ingress_replication: bgp
+    suppress_arp: false
+    state: present
+    provider: "{{ provider }}"
+    
+- name: configure EVPN for L2 VNI (VLAN 10)
+  nxos_evpn_vni:
+    vni: 10010
+    route_distinguisher: auto
+    route_target_both: auto
+    provider: "{{ provider }}"
+    
+- name: configure test loopback
+  nxos_interface:
+    interface: loopback10
+    mode: layer3
+    provider: "{{ provider }}"
+    
+- name: configure test loopback in VRF red
+  nxos_vrf_interface:
+    interface: loopback10
+    vrf: red
+    provider: "{{ provider }}"
+    
+- name: configure test loopback IP
+  nxos_ip_interface:
+    interface: loopback10
+    addr: 2.2.2.1
+    mask: 32
+    provider: "{{ provider }}"
+    
+- name: create rm_direct_to_bgp route-map
+  nxos_config:
+    lines: 
+      - route-map rm_direct_to_bgp permit
+    match: line
+    provider: "{{ provider }}"
+    
+- name: redistribue connected routes in BGP
+  nxos_bgp_af:
+    asn: "{{ asn }}"
+    vrf: red
+    redistribute: [['direct','rm_direct_to_bgp']]
+    afi: ipv4
+    safi: unicast
     provider: "{{ provider }}"

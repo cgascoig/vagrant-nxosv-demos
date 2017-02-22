@@ -1,5 +1,11 @@
+[all:vars]
+fabric_link_subnet = 10.2.2.
+fabric_link_mask = 30
+loopback_subnet = 10.1.1.
+asn = 65535
+
 [leafswitches]
-192.168.1.1     uplink_addr=2.2.2.2
+192.168.1.1     uplink_addr=2 loopback_addr=2
 
 [leafswitches:vars]
 ansible_connection = local
@@ -9,12 +15,12 @@ password = admin
 transport = nxapi
 
 [spineswitches]
-192.168.1.2
+192.168.1.2     loopback_addr=1
 
 [spineswitches:vars]
 ansible_connection = local
 l1_interface = Ethernet1/7
-l1_interface_addr = 2.2.2.1
+l1_interface_addr = 1
 username = admin
 password = admin
 transport = nxapi

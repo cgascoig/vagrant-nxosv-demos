@@ -1,3 +1,5 @@
+#Common Role
+
 ---
 # - name: set NTP server
 #   nxos_ntp:
@@ -25,5 +27,48 @@
 - name: create OSPF instance
   nxos_ospf:
     ospf: underlay-1
+    state: present
+    provider: "{{ provider }}"
+    
+- name: create loopback0
+  nxos_interface:
+    interface: loopback0
+    description: Loopback for BGP sessions, VTEP, etc
+    mode: layer3
+    state: present
+    provider: "{{ provider }}"
+
+- name: configure loopback0 IP address
+  nxos_ip_interface:
+    interface: loopback0
+    version: v4
+    state: present
+    addr: "{{ loopback_subnet }}{{ loopback_addr }}"
+    mask: 32
+    provider: "{{ provider }}"
+    
+- name: configure OSPF on loopback
+  nxos_interface_ospf:
+    interface: loopback0
+    ospf: underlay-1
+    area: 0
+    provider: "{{ provider }}"
+
+- name: enable NV Overlay EVPN
+  nxos_evpn_global:
+    nv_overlay_evpn: true
+    provider: "{{ provider }}"
+
+- name: configure BGP instance
+  nxos_bgp:
+    asn: "{{ asn }}"
+    state: present
+    provider: "{{ provider }}"
+    
+- name: configure BGP EVPN AF 
+  nxos_bgp_af:
+    asn: "{{ asn }}"
+    afi: l2vpn
+    safi: evpn
     state: present
     provider: "{{ provider }}"

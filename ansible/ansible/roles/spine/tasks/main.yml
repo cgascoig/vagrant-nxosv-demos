@@ -1,3 +1,4 @@
+#Spine Role
 ---
     
 - name: set leaf1 downlink to L3
@@ -12,8 +13,8 @@
     interface: "{{ l1_interface }}"
     version: v4
     state: present
-    addr: "{{ l1_interface_addr }}"
-    mask: 30
+    addr: "{{ fabric_link_subnet }}{{ l1_interface_addr }}"
+    mask: "{{ fabric_link_mask }}"
     provider: "{{ provider }}"
     
 - name: configure OSPF on downlink
@@ -30,3 +31,26 @@
     match: line
     parents: "interface {{ l1_interface }}"
     provider: "{{ provider }}"
+    
+- name: configure leaf BGP neighbours
+  nxos_bgp_neighbor:
+    asn: "{{ asn }}"
+    neighbor: "{{ loopback_subnet }}{{ hostvars[item]['loopback_addr'] }}"
+    remote_as: "{{ asn }}"
+    description: "spine {{ item }}"
+    update_source: loopback0
+    state: present
+    provider: "{{ provider }}"
+  with_items: "{{ groups['leafswitches'] }}"
+  
+- name: configure leaf BGP neighbours AF
+  nxos_bgp_neighbor_af:
+    asn: "{{ asn }}"
+    neighbor: "{{ loopback_subnet }}{{ hostvars[item]['loopback_addr'] }}"
+    afi: l2vpn
+    safi: evpn
+    send_community: both
+    route_reflector_client: true
+    state: present
+    provider: "{{ provider }}"
+  with_items: "{{ groups['leafswitches'] }}"
