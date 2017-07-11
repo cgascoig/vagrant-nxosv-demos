@@ -26,9 +26,9 @@ Vagrant.configure(2) do |config|
 
 
     master.vm.provision "shell", privileged: false, inline: <<-SHELL
-        sudo apt-get -y install software-properties-common
-        sudo apt-add-repository -y ppa:ansible/ansible
-        sudo apt-get -y install ansible
+      sudo apt-get -y install python-pip
+      sudo apt-get -y install build-essential libssl-dev libffi-dev python3-dev
+      sudo pip install 'ansible<2.3'
     SHELL
 
   end
